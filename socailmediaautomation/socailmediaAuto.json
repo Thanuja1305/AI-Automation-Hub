@@ -1,0 +1,205 @@
+{
+  "name": "socailmediaAuto",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1I-jG-r9mBg3mOcb1W3LfPpotFu0WNylNNId0alaJh6Y",
+          "mode": "list",
+          "cachedResultName": "socialmediawf",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I-jG-r9mBg3mOcb1W3LfPpotFu0WNylNNId0alaJh6Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I-jG-r9mBg3mOcb1W3LfPpotFu0WNylNNId0alaJh6Y/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "bfbe03ef-98d9-4f0c-a5e1-9519f5afd15a",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "rl7GQEmKH3XCeq2Y",
+          "name": "Google Sheets Trigger account 3100"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=System: \"You are a social media strategist.\"\n\nUser: \"Write a professional LinkedIn post about the article below. \n\nRules:\n1. Start with a hook. Do NOT say 'Here is a summary' or 'According to the article'.\n2. Use bullet points for key insights.\n3. Keep the total length under 2,000 characters.\n4. End with 2-3 hashtags.\n\nArticle to use: {{ $json.newslink }}\"",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "d66d271d-c95d-4e68-bfdc-fced43e9d98e",
+      "name": "Summarize Articles"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        208
+      ],
+      "id": "ede83800-9293-4164-a65b-001c1ccf0fce",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VDKrLbTo64a7w8QF",
+          "name": "Google Gemini(PaLM) Api account 7856"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assume the role of an industry expert and draft a LinkedIn post discussing key points from the news article summary provided.\n\nSTRICT GUIDELINES:\n\nNo Intro: Do not include any introductory phrases like \"Here's a draft\" or \"Sure, I can help.\" Start immediately with the post content.\n\nNo Separators: Do not use \"---\" or \"Subject:\" lines.\n\nCharacter Limit: The total response MUST be under 2,500 characters.\n\nStructure: Use a strong hook, clear bullet points for the key takeaways, and a professional call to action at the end.\n\nSummary to use: {{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        496,
+        -16
+      ],
+      "id": "0ddaba65-d07d-4cba-bbfa-2e5ad8570cbd",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        208
+      ],
+      "id": "0f31169a-0d72-4481-95fb-89a2d9a05cc6",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VDKrLbTo64a7w8QF",
+          "name": "Google Gemini(PaLM) Api account 7856"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "n5FhampJR3",
+        "text": "={{ $json.text.substring(0, 2990) + \"...\" }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "4b1512ad-dde0-4829-91fd-00e07221a001",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "zlKJ0B1YugVrKyO7",
+          "name": "LinkedIn account 2229"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Summarize Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize Articles",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Articles": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "046d0426-9396-4c88-9a4d-3d1f17012459",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "kbikWjLyygtfhMwd",
+  "tags": []
+}

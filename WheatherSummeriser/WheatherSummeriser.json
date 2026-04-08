@@ -1,0 +1,167 @@
+{
+  "name": "My Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -880,
+        -32
+      ],
+      "id": "c28bd84e-3f61-42b7-b4aa-55a80dc92df4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "Hyderabad,IN"
+            },
+            {
+              "name": "appid",
+              "value": "5e0808adf8a2a9503652c2e21eafaa85"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -672,
+        -32
+      ],
+      "id": "053aee88-1353-40bb-bcf9-df1500e2fdbd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI daily assistant creating a fun and personalized weather-based plan. Based on this weather data:\n\nTemperature: {{$json.main.temp}}°C\nWeather: {{$json.weather[0].description}}\nHumidity: {{$json.main.humidity}}%\n\nStart with a short, friendly greeting about today’s weather (e.g., “Good morning! Here’s your weather-ready plan for today!”).\nThen create a concise plan with these sections:\n\nOUTFIT SUGGESTION\nRecommend one outfit suitable for today’s weather.\nOUTDOOR ACTIVITY\nSuggest one fun outdoor activity, considering the temperature, weather, and humidity.\nWEATHER REMINDER\nInclude a practical, friendly tip (umbrella, sunscreen, jacket, or hydration reminder).\n\nFormatting rules:\nKeep it under 100 words.\nUse a friendly, engaging, and conversational tone.\nDo not use markdown formatting, bold, or special symbols.\nSeparate sections with line breaks and section titles in uppercase.\nSign off with: “Your Daily Weather Assistant”",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -464,
+        -32
+      ],
+      "id": "bfc80cf9-5582-4890-83d3-a3ca38359d07",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        176
+      ],
+      "id": "5fed2069-bfb1-4bb9-bb1f-536ae8e934df",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VDKrLbTo64a7w8QF",
+          "name": "Google Gemini(PaLM) Api account 7856"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "badathalathanuja2006@gmail.com",
+        "subject": "NewsReport!!",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        -32
+      ],
+      "id": "2d1fa5d5-bb75-4920-9fbf-e2972195c6b5",
+      "name": "Send a message",
+      "webhookId": "6baab5c1-701b-4483-ae3c-1b40eb18feb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LWiyu0uEuiJ93bGF",
+          "name": "Gmail account 2170"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "be2eff2d-efb6-44df-b9d2-c70e5bfa85a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "ocxSerwyIMThLnjB",
+  "tags": []
+}
